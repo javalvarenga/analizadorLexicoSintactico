@@ -1,0 +1,104 @@
+{
+  "lex": {
+    "rules": [
+      ["\\n", "return 'NEWLINE';"],
+      ["break", "return 'BREAK';"],
+      ["case", "return 'CASE';"],
+      ["catch", "return 'CATCH';"],
+      ["continue", "return 'CONTINUE';"],
+      ["do", "return 'DO';"],
+      ["else", "return 'ELSE';"],
+      ["elseif", "return 'ELSEIF';"],
+      ["\\(", "return 'OPEN_PARENTHESIS';"],
+      ["\\)", "return 'CLOSE_PARENTHESIS';"],
+      ["end", "return 'END';"],
+      ["for", "return 'FOR';"],
+      ["function", "return 'FUNCTION';"],
+      ["global", "return 'GLOBAL';"],
+      ["if", "return 'IF';"],
+      ["otherwise", "return 'OTHERWISE';"],
+      ["persistent", "return 'PERSISTENT';"],
+      ["return", "return 'RETURN';"],
+      ["switch", "return 'SWITCH';"],
+      ["try", "return 'TRY';"],
+      ["until", "return 'UNTIL';"],
+      ["unwind_protect", "return 'UNWIND_PROTECT';"],
+      ["unwind_protect_cleanup", "return 'UNWIND_PROTECT_CLEANUP';"],
+      ["while", "return 'WHILE';"],
+      ["<=", "return '<=';"],
+      ["==", "return '==';"],
+      ["!=", "return '!=';"],
+      [">=", "return '>=';"],
+      ["<", "return '<';"],
+      [">", "return '>';"],
+      ["\\+", "return '+';"],
+      ["-", "return '-';"],
+      ["\\*", "return '*';"],
+      ["/", "return '/';"],
+      ["=", "return '=';"],
+      [";", "return ';';"],
+      ["\\(", "return '(';"],
+      ["\\)", "return ')';"],
+      ["disp", "return 'DISP';"],
+      ["\\[", "return '[';"],
+      ["\\]", "return ']';"],
+      ["[0-9]+", "return 'NUMBER';"],
+      ["[a-zA-Z_][a-zA-Z0-9_]*", "return 'IDENTIFIER';"],
+      [".", "return 'INVALID';"]
+    ]
+  },
+  "start": "program",
+  "bnf": {
+    "program": [
+      ["statements EOF", "$$ = $1;"]
+    ],
+    "statements": [
+      ["", "$$ = [];"],
+      ["statement NEWLINE statements", "$$ = [$1].concat($3);"]
+    ],
+    "statement": [
+      ["ASSIGN", "$$ = $1;"],
+      ["disp_statement", "$$ = $1;"],
+      ["if_statement", "$$ = $1;"],
+      ["while_statement", "$$ = $1;"]
+    ],
+"ASSIGN": [
+  ["IDENTIFIER = expression", "$$ = { type: 'assignment', id: $1, value: $3 }; console.log('id:', $1, 'value:', $3);"]
+],
+    "expression": [
+      ["comparison", "$$ = $1;"],
+      ["expression '+' comparison", "$$ = { type: 'binary_operation', operator: '+', left: $1, right: $3 };"],
+      ["expression '-' comparison", "$$ = { type: 'binary_operation', operator: '-', left: $1, right: $3 };"]
+    ],
+    "comparison": [
+      ["term", "$$ = $1;"],
+      ["comparison '<=' term", "$$ = { type: 'comparison', operator: '<=', left: $1, right: $3 };"],
+      ["comparison '==' term", "$$ = { type: 'comparison', operator: '==', left: $1, right: $3 };"],
+      ["comparison '!=' term", "$$ = { type: 'comparison', operator: '!=', left: $1, right: $3 };"],
+      ["comparison '>=' term", "$$ = { type: 'comparison', operator: '>=', left: $1, right: $3 };"],
+      ["comparison '<' term", "$$ = { type: 'comparison', operator: '<', left: $1, right: $3 };"],
+      ["comparison '>' term", "$$ = { type: 'comparison', operator: '>', left: $1, right: $3 };"]
+    ],
+    "term": [
+      ["factor", "$$ = $1;"],
+      ["term '*' factor", "$$ = { type: 'binary_operation', operator: '*', left: $1, right: $3 };"],
+      ["term '/' factor", "$$ = { type: 'binary_operation', operator: '/', left: $1, right: $3 };"]
+    ],
+    "factor": [
+      ["NUMBER", "$$ = { type: 'number', value: parseInt(yytext) };"],
+      ["'+' factor", "$$ = $2;"],
+      ["'-' factor", "$$ = { type: 'unary_operation', operator: '-', operand: $2 };"],
+      ["'(' expression ')'", "$$ = $2;"],
+      ["IDENTIFIER", "$$ = { type: 'identifier', value: $1 };"]
+    ],
+    "disp_statement": [
+      ["'disp' '(' expression ')'", "$$ = { type: 'disp', value: $3 };"]
+    ],
+    "if_statement": [
+      ["'if' expression 'end'", "$$ = { type: 'if_statement', condition: $2 };"]
+    ],
+    "while_statement": [
+      ["'while' expression 'end'", "$$ = { type: 'while_statement', condition: $2 };"]
+    ]
+  }
+}
